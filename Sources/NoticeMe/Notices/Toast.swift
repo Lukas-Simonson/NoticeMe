@@ -74,7 +74,6 @@ internal struct Toast: Notice {
                 Color.clear
                     .onAppear {
                         imageHeight = proxy.size.height * (message == nil ? 1 : 0.85)
-                        print(proxy.size.height)
                     }
             }
         }
