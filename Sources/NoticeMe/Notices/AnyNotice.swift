@@ -48,7 +48,13 @@ public struct AnyNotice {
         systemIconColor: Color = .black,
         backgroundColor: Color = .white
     ) -> AnyNotice {
-        AnyNotice(Toast(title, message: message, systemIcon: systemIcon, durationSeconds: seconds, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top))
+        var notice = Toast(title, message: message, systemIcon: systemIcon, durationSeconds: seconds, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top)
+        
+        notice.transition =
+        if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .top), removal: .push(from: .bottom)) }
+        else { .move(edge: .top) }
+        
+        return AnyNotice(notice)
     }
     
     /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
