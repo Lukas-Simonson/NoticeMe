@@ -14,10 +14,22 @@ public class NoticeManager: ObservableObject {
     @Published private(set) var notice: (any Notice)?
     
     /// The current queue of notices to be displayed.
-    private var queue: [any Notice] = [] {
-        
-        // Starts playing the queue when a Notice is added to an empty queue.
-        didSet { if oldValue.isEmpty && !queue.isEmpty { showNextNotice() } }
+    private var queue = NoticeQueue()
+    
+    private var noticeLoop: Task<Void, Never>?
+    
+    /// Adds a new `Notice` to the current queue. Waiting for the notice to be added.
+    ///
+    /// - Note: You can choose to put the passed `Notice` at the start of the queue by setting the urgent
+    /// parameter to true.
+    ///
+    /// Parameters:
+    ///  - notice: The `Notice` to display.
+    ///  - urgent: A bool controlling where to place the new `Notice` in the current queue.
+    public func queueNotice(_ notice: any Notice, urgent: Bool = false) async {
+        if urgent { await queue.addToFrontOfQueue(notice) }
+        else { await queue.addToQueue(notice) }
+        if noticeLoop == nil { showNotice() }
     }
     
     /// Adds a new `Notice` to the current queue.
@@ -29,8 +41,21 @@ public class NoticeManager: ObservableObject {
     ///  - notice: The `Notice` to display.
     ///  - urgent: A bool controlling where to place the new `Notice` in the current queue.
     public func queueNotice(_ notice: any Notice, urgent: Bool = false) {
-        if !urgent { queue.append(notice) }
-        else { queue.insert(notice, at: 0) }
+        Task {
+            await queueNotice(notice, urgent: urgent)
+        }
+    }
+    
+    /// Adds a new `Notice` to the current queue. Waiting for the notice to be added.
+    ///
+    /// - Note: You can choose to put the passed `Notice` at the start of the queue by setting the urgent
+    /// parameter to true.
+    ///
+    /// Parameters:
+    ///  - notice: The `Notice` to display.
+    ///  - urgent: A bool controlling where to place the new `Notice` in the current queue.
+    public func queueNotice(_ notice: AnyNotice, urgent: Bool = false) async {
+        await queueNotice(notice.notice, urgent: urgent)
     }
     
     /// Adds a new `Notice` to the current queue.
@@ -49,14 +74,24 @@ public class NoticeManager: ObservableObject {
     ///
     /// Recursivly runs until the queue is empty. Handles the duration of how long a `Notice` should
     /// be displayed.
-    private func showNextNotice() {
-        Task {
-            await MainActor.run { notice = queue.first! }
-            try? await Task.sleep(nanoseconds: UInt64(notice!.durationSeconds * 1_000_000_000))
-            await MainActor.run { notice = nil }
+    ///
+    /// - Note: Only one showNotice recursion loop can be running at a time, this is tracked by the
+    /// noticeLoop property of the `NoticeManager`.
+    private func showNotice() {
+        guard noticeLoop == nil
+        else { return }
+        
+        noticeLoop = Task {
+            guard let notice = await queue.peek()
+            else { noticeLoop = nil; return }
+            
+            await MainActor.run { self.notice = notice }
+            try? await Task.sleep(nanoseconds: UInt64(notice.durationSeconds * 1_000_000_000))
+            await MainActor.run { self.notice = nil }
             try? await Task.sleep(nanoseconds: 500_000_000)
-            queue.removeFirst()
-            if !queue.isEmpty { showNextNotice() }
+            await queue.popQueue()
+            noticeLoop = nil
+            showNotice()
         }
     }
 }
