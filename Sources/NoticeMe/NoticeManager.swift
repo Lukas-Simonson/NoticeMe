@@ -29,7 +29,7 @@ public class NoticeManager: ObservableObject {
     public func queueNotice(_ notice: any Notice, urgent: Bool = false) async {
         if urgent { await queue.priorityEnqueue(notice) }
         else { await queue.enqueue(notice) }
-        if noticeLoop == nil { showNotice() }
+        showNotice()
     }
     
     /// Adds a new `Notice` to the current queue.
@@ -77,23 +77,20 @@ public class NoticeManager: ObservableObject {
     ///
     /// - Note: Only one showNotice recursion loop can be running at a time, this is tracked by the
     /// noticeLoop property of the `NoticeManager`.
-    private func showNotice(reset: Bool = false) {
-        
-        if reset { noticeLoop?.cancel(); noticeLoop = nil }
-        
+    private func showNotice() {
         guard noticeLoop == nil
         else { return }
         
         noticeLoop = Task {
-            guard let notice = await queue.front
-            else { noticeLoop = nil; return }
+            while let notice = await queue.front {
+                await MainActor.run { self.notice = notice }
+                try? await Task.sleep(nanoseconds: UInt64(notice.durationSeconds * 1_000_000_000))
+                await MainActor.run { self.notice = nil }
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                await queue.dequeue()
+            }
             
-            await MainActor.run { self.notice = notice }
-            try? await Task.sleep(nanoseconds: UInt64(notice.durationSeconds * 1_000_000_000))
-            await MainActor.run { self.notice = nil }
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            await queue.dequeue()
-            showNotice(reset: true)
+            noticeLoop = nil
         }
     }
 }
