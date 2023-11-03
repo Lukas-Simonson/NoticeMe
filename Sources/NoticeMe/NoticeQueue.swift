@@ -10,20 +10,20 @@ import Foundation
 internal actor NoticeQueue {
     private var queue: [any Notice] = []
     
-    internal func peek() -> (any Notice)? {
-        return queue.first
+    internal var front: (any Notice)? {
+        queue.first
     }
     
     @discardableResult
-    internal func popQueue() -> (any Notice)? {
+    internal func dequeue() -> (any Notice)? {
         return queue.removeFirst()
     }
     
-    internal func addToQueue(_ notice: any Notice) {
+    internal func enqueue(_ notice: any Notice) {
         queue.append(notice)
     }
     
-    internal func addToFrontOfQueue(_ notice: any Notice) {
+    internal func priorityEnqueue(_ notice: any Notice) {
         queue.insert(notice, at: 0)
     }
 }

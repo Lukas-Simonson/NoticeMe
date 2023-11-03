@@ -27,8 +27,8 @@ public class NoticeManager: ObservableObject {
     ///  - notice: The `Notice` to display.
     ///  - urgent: A bool controlling where to place the new `Notice` in the current queue.
     public func queueNotice(_ notice: any Notice, urgent: Bool = false) async {
-        if urgent { await queue.addToFrontOfQueue(notice) }
-        else { await queue.addToQueue(notice) }
+        if urgent { await queue.priorityEnqueue(notice) }
+        else { await queue.enqueue(notice) }
         if noticeLoop == nil { showNotice() }
     }
     
@@ -77,21 +77,23 @@ public class NoticeManager: ObservableObject {
     ///
     /// - Note: Only one showNotice recursion loop can be running at a time, this is tracked by the
     /// noticeLoop property of the `NoticeManager`.
-    private func showNotice() {
+    private func showNotice(reset: Bool = false) {
+        
+        if reset { noticeLoop?.cancel(); noticeLoop = nil }
+        
         guard noticeLoop == nil
         else { return }
         
         noticeLoop = Task {
-            guard let notice = await queue.peek()
+            guard let notice = await queue.front
             else { noticeLoop = nil; return }
             
             await MainActor.run { self.notice = notice }
             try? await Task.sleep(nanoseconds: UInt64(notice.durationSeconds * 1_000_000_000))
             await MainActor.run { self.notice = nil }
             try? await Task.sleep(nanoseconds: 500_000_000)
-            await queue.popQueue()
-            noticeLoop = nil
-            showNotice()
+            await queue.dequeue()
+            showNotice(reset: true)
         }
     }
 }
