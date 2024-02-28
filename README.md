@@ -113,7 +113,7 @@ There are 4 different built-in Notices in NoticeMe, they each serve their own pu
             "Stop, you cant do that",   // Required
             seconds: 2.0,               // Required - Defaults to 2.0
             systemIcon: "xmark",        // Required
-            iconColor: .red             // Required - Defaults to 2.0
+            iconColor: .red             // Required
         )
     )
 ```
@@ -172,7 +172,7 @@ struct NumberBubble: Notice {
 Then to add your new custom notice to the queue. You simply create an instance of your notice and pass it to the queueNotice function.
 
 ```swift
-    noticeManager.queueNotice(NumberBubble(42))
+    noticeManager.queueNotice(NumberBubble(for: 42))
 ```
 
 And Voila! You have your own custom notice!
