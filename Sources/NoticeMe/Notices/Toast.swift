@@ -115,7 +115,7 @@ extension Toast {
 }
 
 // MARK: Toast AnyView
-public extension AnyView {
+public extension AnyNotice {
     /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
     @available(iOS 16, *)
     static func toast(
@@ -166,8 +166,9 @@ public extension AnyView {
     }
 }
 
-// MARK: Message AnyView
-public extension AnyView {
+
+// MARK: Message AnyNotice
+public extension AnyNotice {
     /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
     @available(iOS 16, *)
     static func message(

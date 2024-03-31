@@ -60,7 +60,7 @@ extension Snackbar {
     }
 }
 
-public extension AnyView {
+public extension AnyNotice {
     /// A `Notice` that displays a bar of text at the bottom of the screen.
     @available(iOS 16, *)
     static func snackbar(

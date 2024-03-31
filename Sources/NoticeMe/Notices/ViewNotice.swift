@@ -14,7 +14,7 @@ public struct ViewNotice<V: View>: View, Noticeable {
     public var body: V
 }
 
-extension AnyNotice {
+public extension AnyNotice {
     /// A `Notice` that uses a custom created View.
     @available(iOS 16, *)
     static func view<V: View>(
