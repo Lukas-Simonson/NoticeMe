@@ -133,15 +133,11 @@ There are 4 different built-in Notices in NoticeMe, they each serve their own pu
 
 ### Custom Notices
 
-Notice me supports custom notices that can be any SwiftUI view. In order to create a new notice type you simply need to create a struct that conforms to the `Notice` protocol.
-The `Notice` protocol conforms to view, and henceforth requires a body where your custom notice view will be created. `Notice` also has a handful of other required properties,
-that control how its displayed. These properties are:
+Notice me supports custom notices that can be any SwiftUI view. In order to create a new notice type you simply need to create a struct that conforms to the `Noticeable` protocol. The `Noticeable` protocol conforms to `View`, and henceforth requires a body where your custom notice view will be created. `Noticeable` also requires a `noticeInfo` property that controls how it's displayed. This `noticeInfo` property stores a `NoticeInfo` struct that represents the specifics of how your notice will work. You will need to provide it with the following information:
 
-    - `let id: UUID` This is used to uniquely identify each Notice, you can just default it to a new UUID. example: `let id: UUID = UUID()`
-    - `let alignment: Alignment` This is used to control the position of the notice when it is on screen.
-    - `let durationSeconds: Double` This is how long the notice will appear on screen. All the built-in notices use a 2.0 value here.
-    - `let transition: AnyTransition` This is the transition that will be used when the notice appears on screen.
-    - `var body: some View` This is the SwiftUI view that will be displayed for your notice.
+ - `alignment: Alignment` This is used to control the position of the notice when it is on screen.
+ - Either `time: NoticeInfo.Time` or `duration: Duration` dependent on OS Version: This is how long the notice will appear on screen. All built-in notices default to 2 seconds.
+ - `transition: AnyTransition` This is the transition will be used when the notice appears on screen.
 
 A quick example of what a Custom Notice may look like would be the following:
 
