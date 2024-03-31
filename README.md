@@ -146,12 +146,13 @@ that control how its displayed. These properties are:
 A quick example of what a Custom Notice may look like would be the following:
 
 ```swift
-struct NumberBubble: Notice {
+struct NumberBubble: Noticeable {
     
-    var id: UUID = UUID()                       // Default Generated UUID
-    var alignment: Alignment = .top             // Aligns to Top Center
-    var durationSeconds: Double = 3             // Lasts for 3 seconds
-    var transition: AnyTransition = .opacity    // Fades in and out
+    var noticeInfo: NoticeInfo = NoticeInfo(
+        alignment: .top,        // Aligns to top center of screen
+        duration: .seconds(3),  // Lasts for 3 seconds
+        transition: .opacity    // Fades in and out
+    )
     
     var number: Int
     
