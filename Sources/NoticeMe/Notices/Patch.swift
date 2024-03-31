@@ -7,28 +7,13 @@
 
 import SwiftUI
 
-internal struct Patch: Notice {
+internal struct Patch: Noticeable {
     
-    public var id: UUID = UUID()
-    public var alignment: Alignment = .center
-    public var durationSeconds: Double
-    public var transition: AnyTransition = .scale
+    public let noticeInfo: NoticeInfo
     
     private var title: String
     private var systemIcon: String
     private var iconColor: Color
-    
-    internal init(
-        _ title: String,
-        systemIcon: String,
-        iconColor: Color = .black,
-        durationSeconds: Double = 2.0
-    ) {
-        self.title = title
-        self.systemIcon = systemIcon
-        self.iconColor = iconColor
-        self.durationSeconds = durationSeconds
-    }
     
     public var body: some View {
         RoundedRectangle(cornerRadius: 15)
@@ -54,6 +39,41 @@ internal struct Patch: Notice {
     }
 }
 
+extension Patch {
+    internal init(
+        _ title: String,
+        systemIcon: String,
+        iconColor: Color = .black,
+        lasting time: NoticeInfo.Time
+    ) {
+        self.title = title
+        self.systemIcon = systemIcon
+        self.iconColor = iconColor
+        self.noticeInfo = NoticeInfo(
+            alignment: .center,
+            lasting: time,
+            transition: .scale
+        )
+    }
+    
+    @available(iOS 16, *)
+    internal init(
+        _ title: String,
+        systemIcon: String,
+        iconColor: Color = .black,
+        duration: Duration
+    ) {
+        self.title = title
+        self.systemIcon = systemIcon
+        self.iconColor = iconColor
+        self.noticeInfo = NoticeInfo(
+            alignment: .center,
+            duration: duration,
+            transition: .scale
+        )
+    }
+}
+
 #Preview {
-    Patch("Error", systemIcon: "xmark", iconColor: .pink)
+    Patch("Error", systemIcon: "xmark", iconColor: .pink, lasting: .seconds(2))
 }
