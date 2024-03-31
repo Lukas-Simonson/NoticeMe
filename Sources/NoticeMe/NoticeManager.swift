@@ -11,7 +11,7 @@ import SwiftUI
 public class NoticeManager: ObservableObject {
     
     /// The current notice that should be displayed by an Observing `View`.
-    @Published private(set) var notice: (any Notice)?
+    @Published private(set) var notice: (any Noticeable)?
     
     /// The current queue of notices to be displayed.
     private var queue = NoticeQueue()
@@ -26,7 +26,7 @@ public class NoticeManager: ObservableObject {
     /// Parameters:
     ///  - notice: The `Notice` to display.
     ///  - urgent: A bool controlling where to place the new `Notice` in the current queue.
-    public func queueNotice(_ notice: any Notice, urgent: Bool = false) async {
+    public func queueNotice(_ notice: any Noticeable, urgent: Bool = false) async {
         if urgent { await queue.priorityEnqueue(notice) }
         else { await queue.enqueue(notice) }
         showNotice()
@@ -40,7 +40,7 @@ public class NoticeManager: ObservableObject {
     /// Parameters:
     ///  - notice: The `Notice` to display.
     ///  - urgent: A bool controlling where to place the new `Notice` in the current queue.
-    public func queueNotice(_ notice: any Notice, urgent: Bool = false) {
+    public func queueNotice(_ notice: any Noticeable, urgent: Bool = false) {
         Task {
             await queueNotice(notice, urgent: urgent)
         }
@@ -84,7 +84,7 @@ public class NoticeManager: ObservableObject {
         noticeLoop = Task {
             while let notice = await queue.front {
                 await MainActor.run { self.notice = notice }
-                try? await Task.sleep(nanoseconds: UInt64(notice.durationSeconds * 1_000_000_000))
+                try? await Task.sleep(nanoseconds: notice.durationNano)
                 await MainActor.run { self.notice = nil }
                 try? await Task.sleep(nanoseconds: 500_000_000)
                 await queue.dequeue()

@@ -7,15 +7,9 @@
 
 import SwiftUI
 
-internal struct Toast: Notice {
+internal struct Toast: Noticeable {
     
-    public var id = UUID()
-    public var alignment: Alignment = .bottom
-    public var durationSeconds: Double = 2.0
-    
-    public var transition: AnyTransition =
-    if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
-    else { .move(edge: .bottom) }
+    public var noticeInfo: NoticeInfo
     
     private var title: String
     private var message: String?
@@ -23,26 +17,6 @@ internal struct Toast: Notice {
     private var textColor: Color
     private var systemIconColor: Color
     private var backgroundColor: Color
-    
-    internal init(
-        _ title: String,
-        message: String? = nil,
-        systemIcon: String? = nil,
-        durationSeconds: Double = 2.0,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white,
-        alignment: Alignment = .bottom
-    ) {
-        self.title = title
-        self.message = message
-        self.systemIcon = systemIcon
-        self.durationSeconds = durationSeconds
-        self.textColor = textColor
-        self.systemIconColor = systemIconColor
-        self.backgroundColor = backgroundColor
-        self.alignment = alignment
-    }
     
     @State private var imageHeight: CGFloat = .zero
     
@@ -87,9 +61,66 @@ internal struct Toast: Notice {
     }
 }
 
+extension Toast {
+    internal init(
+        _ title: String,
+        message: String? = nil,
+        systemIcon: String? = nil,
+        lasting time: NoticeInfo.Time,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white,
+        alignment: Alignment = .bottom
+    ) {
+        self.title = title
+        self.message = message
+        self.systemIcon = systemIcon
+        self.textColor = textColor
+        self.systemIconColor = systemIconColor
+        self.backgroundColor = backgroundColor
+        
+        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
+        else { .move(edge: .bottom) }
+        
+        self.noticeInfo = NoticeInfo(
+            alignment: .bottom,
+            lasting: time,
+            transition: transition
+        )
+    }
+    
+    @available(iOS 16, *)
+    internal init(
+        _ title: String,
+        message: String? = nil,
+        systemIcon: String? = nil,
+        duration: Duration,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white,
+        alignment: Alignment = .bottom
+    ) {
+        self.title = title
+        self.message = message
+        self.systemIcon = systemIcon
+        self.textColor = textColor
+        self.systemIconColor = systemIconColor
+        self.backgroundColor = backgroundColor
+        
+        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
+        else { .move(edge: .bottom) }
+        
+        self.noticeInfo = NoticeInfo(
+            alignment: .bottom,
+            duration: duration,
+            transition: transition
+        )
+    }
+}
+
 #Preview {
     ZStack {
-        Toast("Hello, World", message: "How Are You?", systemIcon: "pencil.circle.fill")
+        Toast("Hello, World", message: "How Are You?", systemIcon: "pencil.circle.fill", lasting: .seconds(2))
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
 }

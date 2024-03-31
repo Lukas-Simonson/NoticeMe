@@ -7,27 +7,13 @@
 
 import SwiftUI
 
-internal struct Snackbar: Notice {
+internal struct Snackbar: Noticeable {
 
-    public var id = UUID()
-    public var alignment: Alignment = .bottom
-    public var durationSeconds: Double = 2.0
-    public var transition: AnyTransition = .move(edge: .bottom)
+    public let noticeInfo: NoticeInfo
     
     private var message: String
     private var textColor: Color
     private var backgroundColor: Color
-    
-    internal init(
-        _ message: String,
-        durationSeconds: Double = 2.0,
-        textColor: Color = .white,
-        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
-    ) {
-        self.message = message
-        self.textColor = textColor
-        self.backgroundColor = backgroundColor
-    }
     
     public var body: some View {
         Text(message)
@@ -39,9 +25,44 @@ internal struct Snackbar: Notice {
     }
 }
 
+extension Snackbar {
+    internal init(
+        _ message: String,
+        lasting time: NoticeInfo.Time,
+        textColor: Color = .white,
+        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
+    ) {
+        self.message = message
+        self.textColor = textColor
+        self.backgroundColor = backgroundColor
+        self.noticeInfo = NoticeInfo(
+            alignment: .bottom,
+            lasting: time,
+            transition: .move(edge: .bottom)
+        )
+    }
+    
+    @available(iOS 16, *)
+    internal init(
+        _ message: String,
+        duration: Duration,
+        textColor: Color = .white,
+        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
+    ) {
+        self.message = message
+        self.textColor = textColor
+        self.backgroundColor = backgroundColor
+        self.noticeInfo = NoticeInfo(
+            alignment: .bottom,
+            duration: duration,
+            transition: .move(edge: .bottom)
+        )
+    }
+}
+
 #Preview {
     ZStack {
-        Snackbar("Hello, World")
+        Snackbar("Hello, World", lasting: .seconds(2))
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
 }
