@@ -60,6 +60,43 @@ extension Snackbar {
     }
 }
 
+public extension AnyView {
+    /// A `Notice` that displays a bar of text at the bottom of the screen.
+    @available(iOS 16, *)
+    static func snackbar(
+        _ message: String,
+        duration: Duration = .seconds(2),
+        textColor: Color = .white,
+        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
+    ) -> AnyNotice {
+        AnyNotice(Snackbar(message, duration: duration, textColor: textColor, backgroundColor: backgroundColor))
+    }
+    
+    /// A `Notice` that displays a bar of text at the bottom of the screen.
+    @available(iOS, deprecated: 16, renamed: "snackbar(messag:time:textColor:backgroundColor:)")
+    static func snackbar(
+        _ message: String,
+        lasting time: NoticeInfo.Time = .seconds(2),
+        textColor: Color = .white,
+        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
+    ) -> AnyNotice {
+        AnyNotice(Snackbar(message, lasting: time, textColor: textColor, backgroundColor: backgroundColor))
+    }
+    
+    /// A `Notice` that displays a bar of text at the bottom of the screen.
+    @available(*, deprecated, renamed: "snackbar(messag:time:textColor:backgroundColor:)")
+    static func snackbar(
+        _ message: String,
+        seconds: Double = 2.0,
+        textColor: Color = .white,
+        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
+    ) -> AnyNotice {
+        let milliseconds = seconds * 1000
+        
+        return AnyNotice(Snackbar(message, lasting: .milliseconds(Int(milliseconds)), textColor: textColor, backgroundColor: backgroundColor))
+    }
+}
+
 #Preview {
     ZStack {
         Snackbar("Hello, World", lasting: .seconds(2))
