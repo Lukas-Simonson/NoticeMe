@@ -70,7 +70,8 @@ extension Toast {
         textColor: Color = .black,
         systemIconColor: Color = .black,
         backgroundColor: Color = .white,
-        alignment: Alignment = .bottom
+        alignment: Alignment = .bottom,
+        transition: AnyTransition
     ) {
         self.title = title
         self.message = message
@@ -78,9 +79,6 @@ extension Toast {
         self.textColor = textColor
         self.systemIconColor = systemIconColor
         self.backgroundColor = backgroundColor
-        
-        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
-        else { .move(edge: .bottom) }
         
         self.noticeInfo = NoticeInfo(
             alignment: .bottom,
@@ -98,7 +96,8 @@ extension Toast {
         textColor: Color = .black,
         systemIconColor: Color = .black,
         backgroundColor: Color = .white,
-        alignment: Alignment = .bottom
+        alignment: Alignment = .bottom,
+        transition: AnyTransition
     ) {
         self.title = title
         self.message = message
@@ -106,9 +105,6 @@ extension Toast {
         self.textColor = textColor
         self.systemIconColor = systemIconColor
         self.backgroundColor = backgroundColor
-        
-        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
-        else { .move(edge: .bottom) }
         
         self.noticeInfo = NoticeInfo(
             alignment: .bottom,
@@ -118,9 +114,115 @@ extension Toast {
     }
 }
 
+// MARK: Toast AnyView
+public extension AnyView {
+    /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
+    @available(iOS 16, *)
+    static func toast(
+        _ title: String,
+        message: String? = nil,
+        duration: Duration = .seconds(2),
+        systemIcon: String? = nil,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white
+    ) -> AnyNotice {
+        AnyNotice(Toast(title, message: message, systemIcon: systemIcon, duration: duration, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .bottom, transition: .move(edge: .bottom)))
+    }
+    
+    /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
+    @available(iOS, deprecated: 16, renamed: "toast(title:message:duration:systemIcon:textColor:systemIconColor:backgroundColor:)")
+    static func toast(
+        _ title: String,
+        message: String? = nil,
+        lasting time: NoticeInfo.Time = .seconds(2),
+        systemIcon: String? = nil,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white
+    ) -> AnyNotice {
+        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
+        else { .move(edge: .bottom) }
+        
+        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: time, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .bottom,  transition: transition))
+    }
+    
+    /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
+    @available(*, deprecated, renamed: "toast(title:message:time:systemIcon:textColor:systemIconColor:backgroundColor:)")
+    static func toast(
+        _ title: String,
+        message: String? = nil,
+        seconds: Double = 2.0,
+        systemIcon: String? = nil,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white
+    ) -> AnyNotice {
+        let milliseconds = seconds * 1000
+        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
+        else { .move(edge: .bottom) }
+
+        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: .milliseconds(Int(milliseconds)), textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .bottom, transition: transition))
+    }
+}
+
+// MARK: Message AnyView
+public extension AnyView {
+    /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
+    @available(iOS 16, *)
+    static func message(
+        _ title: String,
+        message: String? = nil,
+        duration: Duration = .seconds(2),
+        systemIcon: String? = nil,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white
+    ) -> AnyNotice {
+        AnyNotice(Toast(title, message: message, systemIcon: systemIcon, duration: duration, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top, transition: .move(edge: .top)))
+    }
+    
+    /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
+    @available(iOS, deprecated: 16, renamed: "message(title:message:duration:systemIcon:textColor:systemIconColor:backgroundColor:)")
+    static func message(
+        _ title: String,
+        message: String? = nil,
+        lasting time: NoticeInfo.Time = .seconds(2),
+        systemIcon: String? = nil,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white
+    ) -> AnyNotice {
+        let transition: AnyTransition =
+        if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .top), removal: .push(from: .bottom)) }
+        else { .move(edge: .top) }
+        
+        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: time, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top, transition: transition))
+    }
+    
+    /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
+    @available(*, deprecated, renamed: "message(title:message:time:systemIcon:textColor:systemIconColor:backgroundColor:)")
+    static func message(
+        _ title: String,
+        message: String? = nil,
+        seconds: Double = 2.0,
+        systemIcon: String? = nil,
+        textColor: Color = .black,
+        systemIconColor: Color = .black,
+        backgroundColor: Color = .white
+    ) -> AnyNotice {
+        let milliseconds = seconds * 1000
+        let transition: AnyTransition =
+        if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .top), removal: .push(from: .bottom)) }
+        else { .move(edge: .top) }
+        
+        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: .milliseconds(Int(milliseconds)), textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top, transition: transition))
+    }
+}
+
 #Preview {
     ZStack {
-        Toast("Hello, World", message: "How Are You?", systemIcon: "pencil.circle.fill", lasting: .seconds(2))
+        Toast("Hello, World", message: "How Are You?", systemIcon: "pencil.circle.fill", lasting: .seconds(2), transition: .move(edge: .bottom))
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
 }

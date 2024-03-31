@@ -174,6 +174,19 @@ Then to add your new custom notice to the queue. You simply create an instance o
 
 And Voila! You have your own custom notice!
 
+You can also use a `ViewNotice` to create a custom `Notice` without making your own type! You simply pass what view you want to have displayed, along with the information needed to display the `Notice`. Here is a quick example of how you may do the NumberBubble example like above using this other feature.
+
+```swift
+    let number = 1
+    noticeManager.queueNotice(.view(alignment: .top, lasting: .seconds(3), transition: .opacity) {
+        Text("\(number)")
+            .bold()
+            .padding()
+            .foregroundStyle(.white)
+            .background(RoundedRectangle(cornerRadius: 15).fill(Color.blue))
+    })
+```
+
 ## Installation
 
 ### Swift Package Manager

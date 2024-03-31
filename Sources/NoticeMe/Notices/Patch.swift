@@ -1,6 +1,6 @@
 //
 //  SwiftUIView.swift
-//  
+//
 //
 //  Created by Lukas Simonson on 11/1/23.
 //
@@ -71,6 +71,44 @@ extension Patch {
             duration: duration,
             transition: .scale
         )
+    }
+}
+
+public extension AnyNotice {
+    
+    /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
+    @available(iOS 16, *)
+    static func patch(
+        _ title: String,
+        duration: Duration = .seconds(2),
+        systemIcon: String,
+        iconColor: Color = .black
+    ) -> AnyNotice {
+        return AnyNotice(Patch(title, systemIcon: systemIcon, iconColor: iconColor, duration: duration))
+    }
+    
+    /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
+    @available(iOS, deprecated: 16, renamed: "patch(title:duration:systemIcon:iconColor:)")
+    static func patch(
+        _ title: String,
+        lasting time: NoticeInfo.Time,
+        systemIcon: String,
+        iconColor: Color = .black
+    ) -> AnyNotice {
+        return AnyNotice(Patch(title, systemIcon: systemIcon, iconColor: iconColor, lasting: time))
+    }
+    
+    /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
+    @available(*, deprecated, renamed: "patch(title:time:systemIcon:iconColor:)")
+    static func patch(
+        _ title: String,
+        seconds: Double = 2.0,
+        systemIcon: String,
+        iconColor: Color = .black
+    ) -> AnyNotice {
+        let milliseconds = seconds * 1000
+        
+        return AnyNotice(Patch(title, systemIcon: systemIcon, iconColor: iconColor, lasting: .milliseconds(Int(milliseconds))))
     }
 }
 
