@@ -62,7 +62,7 @@ internal struct Toast: Noticeable {
 }
 
 extension Toast {
-    internal init(
+    public init(
         _ title: String,
         message: String? = nil,
         systemIcon: String? = nil,
@@ -88,7 +88,7 @@ extension Toast {
     }
     
     @available(iOS 16, *)
-    internal init(
+    public init(
         _ title: String,
         message: String? = nil,
         systemIcon: String? = nil,

@@ -26,7 +26,7 @@ internal struct Snackbar: Noticeable {
 }
 
 extension Snackbar {
-    internal init(
+    public init(
         _ message: String,
         lasting time: NoticeInfo.Time,
         textColor: Color = .white,
@@ -43,7 +43,7 @@ extension Snackbar {
     }
     
     @available(iOS 16, *)
-    internal init(
+    public init(
         _ message: String,
         duration: Duration,
         textColor: Color = .white,
