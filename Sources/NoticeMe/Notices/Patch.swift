@@ -40,7 +40,7 @@ internal struct Patch: Noticeable {
 }
 
 extension Patch {
-    internal init(
+    public init(
         _ title: String,
         systemIcon: String,
         iconColor: Color = .black,
@@ -57,7 +57,7 @@ extension Patch {
     }
     
     @available(iOS 16, *)
-    internal init(
+    public init(
         _ title: String,
         systemIcon: String,
         iconColor: Color = .black,
