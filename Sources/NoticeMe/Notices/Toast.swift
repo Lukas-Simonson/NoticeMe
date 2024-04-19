@@ -81,7 +81,7 @@ extension Toast {
         self.backgroundColor = backgroundColor
         
         self.noticeInfo = NoticeInfo(
-            alignment: .bottom,
+            alignment: alignment,
             lasting: time,
             transition: transition
         )
@@ -107,7 +107,7 @@ extension Toast {
         self.backgroundColor = backgroundColor
         
         self.noticeInfo = NoticeInfo(
-            alignment: .bottom,
+            alignment: alignment,
             duration: duration,
             transition: transition
         )
