@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-internal struct Snackbar: Noticeable {
+public struct Snackbar: Noticeable {
 
     public let noticeInfo: NoticeInfo
     

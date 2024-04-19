@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-internal struct Patch: Noticeable {
+public struct Patch: Noticeable {
     
     public let noticeInfo: NoticeInfo
     
