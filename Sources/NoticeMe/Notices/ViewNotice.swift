@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct ViewNotice<V: View>: View, Noticeable {
+internal struct ViewNotice<V: View>: View, Noticeable {
     
     public var noticeInfo: NoticeInfo
     

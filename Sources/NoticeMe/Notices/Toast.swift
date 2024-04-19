@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-internal struct Toast: Noticeable {
+public struct Toast: Noticeable {
     
     public var noticeInfo: NoticeInfo
     
