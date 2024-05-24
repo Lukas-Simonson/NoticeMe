@@ -26,6 +26,11 @@ public struct NoticeHandler<Content: View>: View {
         self.content = content
     }
     
+    public init(_ manager: NoticeManager, content: @escaping () -> Content) {
+        self._manager = StateObject(wrappedValue: manager)
+        self.content = content
+    }
+    
     public var body: some View {
         content()
             .environment(\.noticeManager, manager)
