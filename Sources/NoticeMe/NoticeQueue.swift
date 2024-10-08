@@ -16,7 +16,11 @@ internal actor NoticeQueue {
     
     @discardableResult
     internal func dequeue() -> (any Noticeable)? {
-        return queue.removeFirst()
+        if !queue.isEmpty {
+            return queue.removeFirst()
+        } else {
+            return nil
+        }
     }
     
     internal func enqueue(_ notice: any Noticeable) {
