@@ -37,8 +37,11 @@ public struct NoticeHandler<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(alignment: manager.notice?.alignment ?? .center) {
                 ZStack {
-                    if let notice = manager.notice {
+                    if let notice = manager.notice,
+                       let cancellation = manager.cancellation
+                    {
                         AnyView(notice)
+                            .environment(\.noticeCancellation, cancellation)
                             .transition(notice.transition)
                             .id(notice.id)
                     }

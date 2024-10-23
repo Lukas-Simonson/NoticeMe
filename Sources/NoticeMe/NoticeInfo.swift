@@ -10,14 +10,21 @@ import SwiftUI
 public struct NoticeInfo: Identifiable {
     public let id: UUID
     public let alignment: Alignment
-    public let durationNanoseconds: UInt64
+    public let presentation: Presentation
     public var transition: AnyTransition
+    
+    public init(alignment: Alignment, transition: AnyTransition) {
+        self.id = UUID()
+        self.alignment = alignment
+        self.presentation = .untilCancellation
+        self.transition = transition
+    }
     
     @available(iOS, deprecated: 16, message: "init(alignment:duration:transition:)")
     public init(alignment: Alignment, lasting: Time, transition: AnyTransition) {
         self.id = UUID()
         self.alignment = alignment
-        self.durationNanoseconds = lasting.nanoseconds
+        self.presentation = .duration(nano: lasting.nanoseconds)
         self.transition = transition
     }
     
@@ -25,7 +32,7 @@ public struct NoticeInfo: Identifiable {
     public init(alignment: Alignment, duration: Duration, transition: AnyTransition) {
         self.id = UUID()
         self.alignment = alignment
-        self.durationNanoseconds = duration.nanoseconds
+        self.presentation = .duration(nano: duration.nanoseconds)
         self.transition = transition
     }
     
@@ -42,6 +49,11 @@ public struct NoticeInfo: Identifiable {
                 case .nanoseconds(let nano): return UInt64(nano)
             }
         }
+    }
+    
+    public enum Presentation {
+        case duration(nano: UInt64)
+        case untilCancellation
     }
 }
 
