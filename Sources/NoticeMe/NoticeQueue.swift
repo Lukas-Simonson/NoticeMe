@@ -10,10 +10,6 @@ import Foundation
 internal actor NoticeQueue {
     private var queue: [any Noticeable] = []
     
-    internal var front: (any Noticeable)? {
-        queue.first
-    }
-    
     @discardableResult
     internal func dequeue() -> (any Noticeable)? {
         if !queue.isEmpty {

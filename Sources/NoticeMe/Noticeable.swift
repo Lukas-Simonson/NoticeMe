@@ -15,6 +15,6 @@ public protocol Noticeable: View {
 internal extension Noticeable {
     var id: UUID { noticeInfo.id }
     var alignment: Alignment { noticeInfo.alignment }
-    var durationNano: UInt64 { noticeInfo.durationNanoseconds }
+    var presentation: NoticeInfo.Presentation { noticeInfo.presentation }
     var transition: AnyTransition { noticeInfo.transition }
 }

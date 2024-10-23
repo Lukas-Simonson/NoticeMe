@@ -136,7 +136,7 @@ There are 4 different built-in Notices in NoticeMe, they each serve their own pu
 Notice me supports custom notices that can be any SwiftUI view. In order to create a new notice type you simply need to create a struct that conforms to the `Noticeable` protocol. The `Noticeable` protocol conforms to `View`, and henceforth requires a body where your custom notice view will be created. `Noticeable` also requires a `noticeInfo` property that controls how it's displayed. This `noticeInfo` property stores a `NoticeInfo` struct that represents the specifics of how your notice will work. You will need to provide it with the following information:
 
  - `alignment: Alignment` This is used to control the position of the notice when it is on screen.
- - Either `time: NoticeInfo.Time` or `duration: Duration` dependent on OS Version: This is how long the notice will appear on screen. All built-in notices default to 2 seconds.
+ - Either `time: NoticeInfo.Time` or `duration: Duration` dependent on OS Version: This is how long the notice will appear on screen. All built-in notices default to 2 seconds. This can be omitted to create a notice that lasts until cancelled.
  - `transition: AnyTransition` This is the transition will be used when the notice appears on screen.
 
 A quick example of what a Custom Notice may look like would be the following:
@@ -186,6 +186,39 @@ You can also use a `ViewNotice` to create a custom `Notice` without making your 
             .background(RoundedRectangle(cornerRadius: 15).fill(Color.blue))
     })
 ```
+
+### Cancellable Notices
+
+All notices can be cancelled from within by using the `@NoticeCancellation` property wrapper. This property wrapper gives you access to a `Cancellation` that when called, will stop the notice from being shown.
+
+> [!NOTE]
+> This property wrapper can only be accessed from within the scope of a custom notice.
+
+Here is an example notice that does not have a time limit to be shown, and instead requires the user to tap on the notice to make it go away.
+
+```swift
+struct TapToHideNotice: Noticeable {
+    
+    var noticeInfo = NoticeInfo(
+        alignment: .center,
+        // No Duration or Time provided, meaning only calling the `Cancellation` will trigger the notice to dismiss.
+        transition: .scale
+    )
+    
+    @NoticeCancellation var cancellation // Gain access to the cancellation, this can be used in notices with or without a duration.
+    
+    var body: some View {
+        Text("Tap To Hide")
+            .padding()
+            .background(Material.thick)
+            .clipShape(RoundedRectangle(cornerRadius: 15))
+            .onTapGesture {
+                cancellation() // Calls the cancellation to dismiss the notice.
+            }
+    }
+}
+```
+
 
 ## Installation
 
