@@ -21,6 +21,8 @@ public class NoticeManager: ObservableObject {
     
     private var noticeLoop: Task<Void, Never>?
     
+    public init() { }
+    
     /// Adds a new `Notice` to the current queue. Waiting for the notice to be added.
     ///
     /// - Note: You can choose to put the passed `Notice` at the start of the queue by setting the urgent
