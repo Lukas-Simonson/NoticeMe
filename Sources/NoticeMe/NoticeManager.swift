@@ -8,6 +8,7 @@
 import SwiftUI
 
 /// A Class that manages the order and speed at which `Notice`s are given to an Observing `View`.
+@MainActor
 public class NoticeManager: ObservableObject {
     
     /// The current notice that should be displayed by an Observing `View`.
@@ -88,6 +89,7 @@ public class NoticeManager: ObservableObject {
     /// Function to continuously update the managers current `Notice` to the first item of the queue.
     ///
     /// Runs until the queue is empty. Handles the duration of how long a `Notice` should be displayed.
+    @MainActor
     private func showNotice() {
         
         // Make sure no loop is currently running.
