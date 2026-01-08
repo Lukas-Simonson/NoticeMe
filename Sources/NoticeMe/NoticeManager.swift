@@ -49,7 +49,6 @@ public class NoticeManager: ObservableObject {
     public func queueNotice(_ notice: any Noticeable, urgent: Bool = false) {
         Task {
             await queueNotice(notice, urgent: urgent)
-            print("Notice Queued")
         }
     }
     
