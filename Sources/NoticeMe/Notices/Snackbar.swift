@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  Snackbar.swift
 //  
 //
 //  Created by Lukas Simonson on 11/1/23.
@@ -11,47 +11,30 @@ public struct Snackbar: Noticeable {
 
     public let noticeInfo: NoticeInfo
     
-    private var message: String
-    private var textColor: Color
-    private var backgroundColor: Color
+    private let message: LocalizedStringResource
+    private let foreground: AnyShapeStyle
+    private let background: AnyShapeStyle
     
     public var body: some View {
         Text(message)
             .font(.headline)
-            .foregroundStyle(textColor)
+            .foregroundStyle(foreground)
             .frame(maxWidth: .infinity)
             .padding()
-            .background(backgroundColor)
+            .background(background)
     }
 }
 
 extension Snackbar {
     public init(
-        _ message: String,
-        lasting time: NoticeInfo.Time,
-        textColor: Color = .white,
-        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
+        _ message: LocalizedStringResource,
+        duration: Duration = .seconds(2),
+        foreground: some ShapeStyle = Color.white,
+        background: some ShapeStyle = Color(red: 0.25, green: 0.25, blue: 0.25)
     ) {
         self.message = message
-        self.textColor = textColor
-        self.backgroundColor = backgroundColor
-        self.noticeInfo = NoticeInfo(
-            alignment: .bottom,
-            lasting: time,
-            transition: .move(edge: .bottom)
-        )
-    }
-    
-    @available(iOS 16, *)
-    public init(
-        _ message: String,
-        duration: Duration,
-        textColor: Color = .white,
-        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
-    ) {
-        self.message = message
-        self.textColor = textColor
-        self.backgroundColor = backgroundColor
+        self.foreground = AnyShapeStyle(foreground)
+        self.background = AnyShapeStyle(background)
         self.noticeInfo = NoticeInfo(
             alignment: .bottom,
             duration: duration,
@@ -60,46 +43,26 @@ extension Snackbar {
     }
 }
 
-public extension AnyNotice {
-    /// A `Notice` that displays a bar of text at the bottom of the screen.
-    @available(iOS 16, *)
+public extension Noticeable where Self == Snackbar {
     static func snackbar(
-        _ message: String,
+        _ message: LocalizedStringResource,
         duration: Duration = .seconds(2),
-        textColor: Color = .white,
-        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
-    ) -> AnyNotice {
-        AnyNotice(Snackbar(message, duration: duration, textColor: textColor, backgroundColor: backgroundColor))
-    }
-    
-    /// A `Notice` that displays a bar of text at the bottom of the screen.
-    @available(iOS, deprecated: 16, renamed: "snackbar(messag:time:textColor:backgroundColor:)")
-    static func snackbar(
-        _ message: String,
-        lasting time: NoticeInfo.Time = .seconds(2),
-        textColor: Color = .white,
-        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
-    ) -> AnyNotice {
-        AnyNotice(Snackbar(message, lasting: time, textColor: textColor, backgroundColor: backgroundColor))
-    }
-    
-    /// A `Notice` that displays a bar of text at the bottom of the screen.
-    @available(*, deprecated, renamed: "snackbar(messag:time:textColor:backgroundColor:)")
-    static func snackbar(
-        _ message: String,
-        seconds: Double = 2.0,
-        textColor: Color = .white,
-        backgroundColor: Color = Color(red: 0.25, green: 0.25, blue: 0.25)
-    ) -> AnyNotice {
-        let milliseconds = seconds * 1000
-        
-        return AnyNotice(Snackbar(message, lasting: .milliseconds(Int(milliseconds)), textColor: textColor, backgroundColor: backgroundColor))
+        foreground: some ShapeStyle = Color.white,
+        background: some ShapeStyle = Color(red: 0.25, green: 0.25, blue: 0.25)
+    ) -> Snackbar {
+        Snackbar(message, duration: duration, foreground: foreground, background: background)
     }
 }
 
 #Preview {
+    
+    @Previewable @State var manager = NoticeManager()
+    
     ZStack {
-        Snackbar("Hello, World", lasting: .seconds(2))
+        Button("Snackbar") {
+            manager.queueNotice(.snackbar(LocalizedStringResource(stringLiteral: "Hello, World")))
+        }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .handleNotices(from: manager)
 }
