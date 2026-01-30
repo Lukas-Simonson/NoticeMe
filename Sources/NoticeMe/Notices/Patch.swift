@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  Patch.swift
 //
 //
 //  Created by Lukas Simonson on 11/1/23.
@@ -11,9 +11,9 @@ public struct Patch: Noticeable {
     
     public let noticeInfo: NoticeInfo
     
-    private var title: String
-    private var systemIcon: String
-    private var iconColor: Color
+    private var title: LocalizedStringResource
+    private var systemImage: String
+    private var imageColor: Color
     
     public var body: some View {
         RoundedRectangle(cornerRadius: 15)
@@ -22,12 +22,12 @@ public struct Patch: Noticeable {
             .frame(maxWidth: 200)
             .overlay(alignment: .center) {
                 VStack {
-                    Image(systemName: systemIcon)
+                    Image(systemName: systemImage)
                         .resizable()
                         .padding()
                         .aspectRatio(contentMode: .fit)
                         .frame(maxWidth: 100)
-                        .foregroundStyle(iconColor)
+                        .foregroundStyle(imageColor)
                     
                     Text(title)
                         .font(.title2)
@@ -40,32 +40,10 @@ public struct Patch: Noticeable {
 }
 
 extension Patch {
-    public init(
-        _ title: String,
-        systemIcon: String,
-        iconColor: Color = .black,
-        lasting time: NoticeInfo.Time
-    ) {
+    public init(_ title: LocalizedStringResource, duration: Duration = .seconds(2), systemImage: String, imageColor: Color = .primary) {
         self.title = title
-        self.systemIcon = systemIcon
-        self.iconColor = iconColor
-        self.noticeInfo = NoticeInfo(
-            alignment: .center,
-            lasting: time,
-            transition: .scale
-        )
-    }
-    
-    @available(iOS 16, *)
-    public init(
-        _ title: String,
-        systemIcon: String,
-        iconColor: Color = .black,
-        duration: Duration
-    ) {
-        self.title = title
-        self.systemIcon = systemIcon
-        self.iconColor = iconColor
+        self.systemImage = systemImage
+        self.imageColor = imageColor
         self.noticeInfo = NoticeInfo(
             alignment: .center,
             duration: duration,
@@ -74,44 +52,22 @@ extension Patch {
     }
 }
 
-public extension AnyNotice {
+public extension Noticeable where Self == Patch {
     
-    /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
-    @available(iOS 16, *)
-    static func patch(
-        _ title: String,
-        duration: Duration = .seconds(2),
-        systemIcon: String,
-        iconColor: Color = .black
-    ) -> AnyNotice {
-        return AnyNotice(Patch(title, systemIcon: systemIcon, iconColor: iconColor, duration: duration))
-    }
-    
-    /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
-    @available(iOS, deprecated: 16, renamed: "patch(title:duration:systemIcon:iconColor:)")
-    static func patch(
-        _ title: String,
-        lasting time: NoticeInfo.Time,
-        systemIcon: String,
-        iconColor: Color = .black
-    ) -> AnyNotice {
-        return AnyNotice(Patch(title, systemIcon: systemIcon, iconColor: iconColor, lasting: time))
-    }
-    
-    /// A `Notice` that places a "Patch" at the center of the screen, displaying a System Image and a small amount of text.
-    @available(*, deprecated, renamed: "patch(title:time:systemIcon:iconColor:)")
-    static func patch(
-        _ title: String,
-        seconds: Double = 2.0,
-        systemIcon: String,
-        iconColor: Color = .black
-    ) -> AnyNotice {
-        let milliseconds = seconds * 1000
-        
-        return AnyNotice(Patch(title, systemIcon: systemIcon, iconColor: iconColor, lasting: .milliseconds(Int(milliseconds))))
+    static func patch(_ title: LocalizedStringResource, duration: Duration = .seconds(2), systemImage: String, imageColor: Color = .primary) -> Patch {
+        Patch(title, duration: duration, systemImage: systemImage, imageColor: imageColor)
     }
 }
 
 #Preview {
-    Patch("Error", systemIcon: "xmark", iconColor: .pink, lasting: .seconds(2))
+    
+    @Previewable @State var manager = NoticeManager()
+    
+    ZStack {
+        Button("Patch") {
+            manager.queueNotice(.patch(LocalizedStringResource(stringLiteral: "Hello, World"), systemImage: "exclamationmark.triangle.fill"))
+        }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .handleNotices(from: manager)
 }

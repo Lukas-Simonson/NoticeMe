@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  Toast.swift
 //
 //
 //  Created by Lukas Simonson on 11/1/23.
@@ -8,103 +8,89 @@
 import SwiftUI
 
 public struct Toast: Noticeable {
-    
     public var noticeInfo: NoticeInfo
     
-    private var title: String
-    private var message: String?
-    private var systemIcon: String?
-    private var textColor: Color
-    private var systemIconColor: Color
-    private var backgroundColor: Color
+    private var title: LocalizedStringResource
+    private var message: LocalizedStringResource?
+    private var systemImage: String?
     
-    @State private var imageHeight: CGFloat = .zero
+    private var foreground: AnyShapeStyle
+    private var background: AnyShapeStyle
+    private var imageForeground: AnyShapeStyle
+    
+    @State private var imageHeight = CGFloat.zero
     
     public var body: some View {
         HStack {
-            if let systemIcon {
-                Image(systemName: systemIcon)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(systemIconColor)
-                    .frame(maxWidth: imageHeight * 1.5, maxHeight: imageHeight)
-            }
-            
-            VStack(alignment: systemIcon == nil ? .center : .leading) {
-                Text(title)
-                    .font(.subheadline)
-                    .bold()
-                
-                if let message {
-                    Text(message)
-                        .font(.caption2)
-                }
-            }
-            .foregroundStyle(textColor)
-            .multilineTextAlignment(systemIcon == nil ? .center : .leading)
+            image
+            information
         }
-        .overlay {
-            GeometryReader { proxy in
-                Color.clear
-                    .onAppear {
-                        imageHeight = proxy.size.height * (message == nil ? 1 : 0.85)
-                    }
-            }
-        }
+        .overlay(sizeReader)
         .padding()
-        .background(
-            Capsule()
-                .fill(backgroundColor)
-                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
-        )
+        .background(backgroundView)
         .animation(nil, value: imageHeight)
+    }
+    
+    @ViewBuilder
+    private var image: some View {
+        if let systemImage {
+            Image(systemName: systemImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(imageForeground)
+                .frame(maxWidth: imageHeight * 1.5, maxHeight: imageHeight)
+        }
+    }
+    
+    private var information: some View {
+        VStack(alignment: systemImage == nil ? .center : .leading) {
+            Text(title)
+                .font(.subheadline)
+                .bold()
+            
+            if let message {
+                Text(message)
+                    .font(.caption2)
+            }
+        }
+        .foregroundStyle(foreground)
+        .multilineTextAlignment(systemImage == nil ? .center : .leading)
+    }
+    
+    private var sizeReader: some View {
+        GeometryReader { proxy in
+            Color.clear.onAppear {
+                imageHeight = proxy.size.height * (message == nil ? 1 : 0.85)
+            }
+        }
+    }
+    
+    private var backgroundView: some View {
+        Capsule()
+            .fill(background)
+            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
     }
 }
 
-extension Toast {
-    public init(
-        _ title: String,
-        message: String? = nil,
-        systemIcon: String? = nil,
-        lasting time: NoticeInfo.Time,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white,
+public extension Toast {
+    init(
+        title: LocalizedStringResource,
+        message: LocalizedStringResource?,
+        systemImage: String?,
+        foreground: some ShapeStyle,
+        background: some ShapeStyle,
+        imageForeground: some ShapeStyle,
         alignment: Alignment = .bottom,
-        transition: AnyTransition
+        duration: Duration = .seconds(2),
+        transition: AnyTransition = .move(edge: .bottom),
     ) {
         self.title = title
         self.message = message
-        self.systemIcon = systemIcon
-        self.textColor = textColor
-        self.systemIconColor = systemIconColor
-        self.backgroundColor = backgroundColor
+        self.systemImage = systemImage
         
-        self.noticeInfo = NoticeInfo(
-            alignment: alignment,
-            lasting: time,
-            transition: transition
-        )
-    }
-    
-    @available(iOS 16, *)
-    public init(
-        _ title: String,
-        message: String? = nil,
-        systemIcon: String? = nil,
-        duration: Duration,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white,
-        alignment: Alignment = .bottom,
-        transition: AnyTransition
-    ) {
-        self.title = title
-        self.message = message
-        self.systemIcon = systemIcon
-        self.textColor = textColor
-        self.systemIconColor = systemIconColor
-        self.backgroundColor = backgroundColor
+        self.foreground = AnyShapeStyle(foreground)
+        self.background = AnyShapeStyle(background)
+        self.imageForeground = AnyShapeStyle(imageForeground)
         
         self.noticeInfo = NoticeInfo(
             alignment: alignment,
@@ -114,116 +100,65 @@ extension Toast {
     }
 }
 
-// MARK: Toast AnyView
-public extension AnyNotice {
-    /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
-    @available(iOS 16, *)
+public extension Noticeable where Self == Toast {
     static func toast(
-        _ title: String,
-        message: String? = nil,
+        title: LocalizedStringResource,
+        message: LocalizedStringResource? = nil,
+        systemImage: String? = nil,
         duration: Duration = .seconds(2),
-        systemIcon: String? = nil,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white
-    ) -> AnyNotice {
-        AnyNotice(Toast(title, message: message, systemIcon: systemIcon, duration: duration, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .bottom, transition: .move(edge: .bottom)))
+        foreground: some ShapeStyle = Color.primary,
+        background: some ShapeStyle = Material.regular,
+        imageForeground: some ShapeStyle = Color.primary,
+    ) -> Toast {
+        Toast(title: title, message: message, systemImage: systemImage, foreground: foreground, background: background, imageForeground: imageForeground, duration: duration)
     }
     
-    /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
-    @available(iOS, deprecated: 16, renamed: "toast(title:message:duration:systemIcon:textColor:systemIconColor:backgroundColor:)")
-    static func toast(
-        _ title: String,
-        message: String? = nil,
-        lasting time: NoticeInfo.Time = .seconds(2),
-        systemIcon: String? = nil,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white
-    ) -> AnyNotice {
-        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
-        else { .move(edge: .bottom) }
-        
-        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: time, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .bottom,  transition: transition))
-    }
-    
-    /// A `Notice` that displays a small bubble of information using text and an optional system image at the bottom of the screen.
-    @available(*, deprecated, renamed: "toast(title:message:time:systemIcon:textColor:systemIconColor:backgroundColor:)")
-    static func toast(
-        _ title: String,
-        message: String? = nil,
-        seconds: Double = 2.0,
-        systemIcon: String? = nil,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white
-    ) -> AnyNotice {
-        let milliseconds = seconds * 1000
-        let transition : AnyTransition = if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)) }
-        else { .move(edge: .bottom) }
-
-        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: .milliseconds(Int(milliseconds)), textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .bottom, transition: transition))
-    }
-}
-
-
-// MARK: Message AnyNotice
-public extension AnyNotice {
-    /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
-    @available(iOS 16, *)
     static func message(
-        _ title: String,
-        message: String? = nil,
+        title: LocalizedStringResource,
+        message: LocalizedStringResource? = nil,
+        systemImage: String? = nil,
         duration: Duration = .seconds(2),
-        systemIcon: String? = nil,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white
-    ) -> AnyNotice {
-        AnyNotice(Toast(title, message: message, systemIcon: systemIcon, duration: duration, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top, transition: .move(edge: .top)))
-    }
-    
-    /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
-    @available(iOS, deprecated: 16, renamed: "message(title:message:duration:systemIcon:textColor:systemIconColor:backgroundColor:)")
-    static func message(
-        _ title: String,
-        message: String? = nil,
-        lasting time: NoticeInfo.Time = .seconds(2),
-        systemIcon: String? = nil,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white
-    ) -> AnyNotice {
-        let transition: AnyTransition =
-        if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .top), removal: .push(from: .bottom)) }
-        else { .move(edge: .top) }
-        
-        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: time, textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top, transition: transition))
-    }
-    
-    /// A `Notice` that displays a small bubble of information using text and an optional system image at the top of the screen.
-    @available(*, deprecated, renamed: "message(title:message:time:systemIcon:textColor:systemIconColor:backgroundColor:)")
-    static func message(
-        _ title: String,
-        message: String? = nil,
-        seconds: Double = 2.0,
-        systemIcon: String? = nil,
-        textColor: Color = .black,
-        systemIconColor: Color = .black,
-        backgroundColor: Color = .white
-    ) -> AnyNotice {
-        let milliseconds = seconds * 1000
-        let transition: AnyTransition =
-        if #available(iOS 16.0, *) { .asymmetric(insertion: .push(from: .top), removal: .push(from: .bottom)) }
-        else { .move(edge: .top) }
-        
-        return AnyNotice(Toast(title, message: message, systemIcon: systemIcon, lasting: .milliseconds(Int(milliseconds)), textColor: textColor, systemIconColor: systemIconColor, backgroundColor: backgroundColor, alignment: .top, transition: transition))
+        foreground: some ShapeStyle = Color.primary,
+        background: some ShapeStyle = Material.regular,
+        imageForeground: some ShapeStyle = Color.primary,
+    ) -> Toast {
+        Toast(
+            title: title,
+            message: message,
+            systemImage: systemImage,
+            foreground: foreground,
+            background: background,
+            imageForeground: imageForeground,
+            alignment: .top,
+            duration: duration,
+            transition: .move(edge: .top)
+        )
     }
 }
 
 #Preview {
-    ZStack {
-        Toast("Hello, World", message: "How Are You?", systemIcon: "pencil.circle.fill", lasting: .seconds(2), transition: .move(edge: .bottom))
+    
+    @Previewable @State var manager = NoticeManager()
+    
+    VStack {
+        Button("Toast") {
+            manager.queueNotice(.toast(
+                title: LocalizedStringResource(stringLiteral: "Hello, World"),
+                message: LocalizedStringResource(stringLiteral: "How Are You?"),
+                systemImage: "pencil.circle.fill",
+                duration: .seconds(2)
+            ))
+        }
+        
+        Button("Message") {
+            manager.queueNotice(.message(
+                title: LocalizedStringResource(stringLiteral: "Hello, World"),
+                message: LocalizedStringResource(stringLiteral: "How Are You?"),
+                systemImage: "pencil.circle.fill",
+                duration: .seconds(2)
+            ))
+        }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .handleNotices(from: manager)
 }
